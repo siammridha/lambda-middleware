@@ -1,4 +1,4 @@
-const Middleware = require('./middleware');
+import Middleware from "./middleware.js"
 const middleware = new Middleware();
 
 middleware.use((event, context, next) => {
