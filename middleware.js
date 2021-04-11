@@ -1,23 +1,26 @@
-module.exports = function Middleware() {
+export default function Middleware() {
     const middlewares = [];
 
-    function use(fn) {
-        middlewares.push(fn);
-        return { use, handler };
-    }
-
-    function handler(event, context) {
-        return executeMiddleware(event, context, middlewares);
-    }
-
-    function executeMiddleware(event, context, [middleware, ...restOfMiddlewares]) {
+    this.use = function (middleware) {
         if (typeof middleware === 'function') {
-            const next = () => executeMiddleware(event, context, restOfMiddlewares);
-            return middleware(event, context, next);
+            return middlewares.push(middleware), this;
         } else {
-            throw Error("no more middleware to execute.");
+            throw Error("middleware must be a function");
         }
     }
 
-    return { use, handler };
+    this.handler = async function (event, context) {
+        if (middlewares.length) {
+            return executeMiddleware(event, context, middlewares);
+        } else {
+            throw Error("must pass at list one middleware function");
+        }
+    }
+
+    const executeMiddleware = (event, context, [nextMiddleware, ...restOfMiddlewares]) => {
+        const next = () => executeMiddleware(event, context, restOfMiddlewares);
+        return nextMiddleware(event, context, next);
+    }
+
+    return this;
 }
