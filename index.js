@@ -32,12 +32,4 @@ middleware.use(async (event, context) => {
     };
 })
 
-
-
-middleware.handler({}, {}).then((res) => {
-    console.log("res:", res)
-}).catch((error) => {
-    console.error("error:", error)
-});
-
-// exports.handler = middleware.handler
+exports.handler = middleware.handler
