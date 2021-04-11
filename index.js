@@ -1,29 +1,43 @@
 const Middleware = require('./middleware');
 const middleware = new Middleware();
 
-middleware.use(async (event, context, next) => {
+middleware.use((event, context, next) => {
     try {
         console.log("error_middleware");
-        next();
+        event['error_middleware'] = "error_middleware";
+        return next();
     } catch (error) {
         return {
             statusCode: 500,
             body: JSON.stringify({ message: error.message }),
         };
     }
-}).use(async (event, context, next) => {
+})
+
+middleware.use((event, context, next) => {
     console.log("middleware_1");
     event['middleware_1'] = "middleware_1";
-    next();
-}).use(async (event, context, next) => {
+    return next();
+})
+
+middleware.use(async (event, context) => {
     console.log("middleware_2");
     event['middleware_2'] = "middleware_2";
-    console.log({ event, context })
+    const data = await new Promise((resolve, reject) => {
+        setTimeout(() => reject({ event, context }), [5000])
+    })
     return {
         statusCode: 200,
-        body: JSON.stringify(event),
+        body: JSON.stringify(data),
     };
 })
 
-const result = middleware.handler
-console.log(result({}, {}))
+
+
+middleware.handler({}, {}).then((res) => {
+    console.log("res:", res)
+}).catch((error) => {
+    console.error("error:", error)
+});
+
+// exports.handler = middleware.handler
