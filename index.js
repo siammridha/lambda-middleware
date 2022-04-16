@@ -1,35 +1,5 @@
-import Middleware from "./middleware.js"
-const middleware = new Middleware();
+import Route from "./route"
+import Router from "./router"
 
-middleware.use((event, context, next) => {
-    try {
-        console.log("error_middleware");
-        event['error_middleware'] = "error_middleware";
-        return next();
-    } catch (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: error.message }),
-        };
-    }
-})
-
-middleware.use((event, context, next) => {
-    console.log("middleware_1");
-    event['middleware_1'] = "middleware_1";
-    return next();
-})
-
-middleware.use(async (event, context) => {
-    console.log("middleware_2");
-    event['middleware_2'] = "middleware_2";
-    const data = await new Promise((resolve, reject) => {
-        setTimeout(() => reject({ event, context }), [5000])
-    })
-    return {
-        statusCode: 200,
-        body: JSON.stringify(data),
-    };
-})
-
-exports.handler = middleware.handler
+module.exports = () => new Route();
+module.exports.router = new Router();
